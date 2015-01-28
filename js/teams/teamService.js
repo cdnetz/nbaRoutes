@@ -1,8 +1,21 @@
 var app = angular.module('nbaRoutes');
 
-app.service('teamService', function($http, $q, teamData){
+app.service('teamService', function($http, $q){
+	this.addNewGame = function(gameObj){
+    var url = "https://api.parse.com/1/classes/" + gameObj.homeTeam;
+    if(parseInt(gameObj.homeTeamScore) > parseInt(gameObj.opponentScore)){
+      gameObj.won = true;
+    } else {
+      gameObj.won = false;
+    }
+
+    return $http.post(url, gameObj);
+  };
+
+
 	this.getTeamData = function(team){
-		$q.defer();
+		var dfd = $q.defer();
+		
 		var url = 'https://api.parse.com/1/classes/' + team;
 
 		$http({
@@ -16,44 +29,19 @@ app.service('teamService', function($http, $q, teamData){
 				if (results[i].won) {
 					wins += 1;
 
-				};
-				if (!resluts[i].won) {
-					losses -= 1;
+				}
+				else {
+					losses += 1;
 				};
 			};
 			results.wins = wins;
 			results.losses = losses;
 
-			defered.resolve(results)
+			dfd.resolve(results)
 		}, function(err){
-			defered.reject(err);
+			dfd.reject(err);
 		})
-
-		
-
-		
-
-		return defered.promise;
-
-
+		return dfd.promise;
 	}
-
-	this.addNewGame = function(gameObject) {
-	var url = "https://api.parse.com/1/classes/" + gameObj.homeTeam;
-
-
-	if (parseInt(gameObj.homeTeamScore) > parseInt(gameObj.opponentScore)) {
-		gameObj.won = true;
-	} else {
-		gameObj.won = false;
-	}
-	$http({
-		method: 'POST',
-		url: url,
-		data: gameObj
-	})
-
-	
-}
 });
 
